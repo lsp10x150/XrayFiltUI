@@ -14,6 +14,9 @@ public:
     explicit about(QWidget *parent = nullptr);
     ~about();
 
+private slots:
+    void on_closeAboutPushButton_clicked();
+
 private:
     Ui::about *ui;
 };

@@ -7,11 +7,17 @@ about::about(QWidget *parent) :
     ui(new Ui::about)
 {
     ui->setupUi(this);
-    QPixmap logo;
-    //logo.
+    QPixmap vniiimtLogo(":/VNIIIMTLogo.png",".png");
+    ui->VNIIIMTLogoLabel->setPixmap(vniiimtLogo);
+    ui->VNIIIMTLogoLabel->setScaledContents(true);
 }
 
 about::~about()
 {
     delete ui;
+}
+
+void about::on_closeAboutPushButton_clicked()
+{
+    QWidget::close();
 }

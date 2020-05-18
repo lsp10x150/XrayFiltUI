@@ -6,7 +6,7 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     MainWindow w;
-    w.setWindowTitle("XrayFilt"); //Название окна
+    w.setWindowTitle("XrayFiltUI"); //Название окна
     w.show();
     return a.exec();
 }

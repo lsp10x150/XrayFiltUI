@@ -23,6 +23,28 @@ private slots:
 
     void on_quitAction_triggered();
 
+    void on_visualisePushButton_clicked();
+
+    void on_chooseInitSpectraFilePushButton_clicked();
+
+    void on_iterationsGroupBox_clicked();
+
+    void on_infoAction_triggered();
+
+    void on_actionO_GEANT4_triggered();
+
+    void on_actionO_Qt_triggered();
+
+    void on_savePushButton_clicked();
+
+    void makePlot(QString);
+
+    void on_simulatedSpectraPushButton_clicked();
+
+    void on_simulatedSpectraLineEdit_textChanged(const QString &arg1);
+
+    void on_spectrasTreeView_doubleClicked(const QModelIndex &index);
+
 private:
     Ui::MainWindow *ui;
 };
