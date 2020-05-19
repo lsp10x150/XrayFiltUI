@@ -152,7 +152,7 @@
                   <enum>Qt::Horizontal</enum>
                  </property>
                  <property name="sizeType">
-                  <enum>QSizePolicy::Fixed</enum>
+                  <enum>QSizePolicy::Expanding</enum>
                  </property>
                  <property name="sizeHint" stdset="0">
                   <size>
@@ -223,7 +223,7 @@
                   <enum>Qt::Horizontal</enum>
                  </property>
                  <property name="sizeType">
-                  <enum>QSizePolicy::Fixed</enum>
+                  <enum>QSizePolicy::Expanding</enum>
                  </property>
                  <property name="sizeHint" stdset="0">
                   <size>
@@ -279,7 +279,7 @@
                   <enum>Qt::Horizontal</enum>
                  </property>
                  <property name="sizeType">
-                  <enum>QSizePolicy::Fixed</enum>
+                  <enum>QSizePolicy::Expanding</enum>
                  </property>
                  <property name="sizeHint" stdset="0">
                   <size>
@@ -395,7 +395,7 @@
                        <enum>Qt::Horizontal</enum>
                       </property>
                       <property name="sizeType">
-                       <enum>QSizePolicy::Fixed</enum>
+                       <enum>QSizePolicy::Expanding</enum>
                       </property>
                       <property name="sizeHint" stdset="0">
                        <size>
@@ -469,7 +469,7 @@
                        <enum>Qt::Horizontal</enum>
                       </property>
                       <property name="sizeType">
-                       <enum>QSizePolicy::Fixed</enum>
+                       <enum>QSizePolicy::Expanding</enum>
                       </property>
                       <property name="sizeHint" stdset="0">
                        <size>
@@ -603,16 +603,6 @@
              </widget>
             </item>
             <item>
-             <widget class="Line" name="line">
-              <property name="lineWidth">
-               <number>2</number>
-              </property>
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-             </widget>
-            </item>
-            <item>
              <spacer name="verticalSpacer_6">
               <property name="orientation">
                <enum>Qt::Vertical</enum>
@@ -687,6 +677,9 @@
              <layout class="QHBoxLayout" name="horizontalLayout_11">
               <item>
                <widget class="QLineEdit" name="simulatedSpectraLineEdit">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="placeholderText">
                  <string>Директория с симулированными спектрами</string>
                 </property>
@@ -702,11 +695,7 @@
              </layout>
             </item>
             <item>
-             <widget class="QTreeView" name="spectrasTreeView">
-              <attribute name="headerCascadingSectionResizes">
-               <bool>false</bool>
-              </attribute>
-             </widget>
+             <widget class="QListView" name="simulatedSpectrasListView"/>
             </item>
            </layout>
           </item>
@@ -733,6 +722,9 @@
                   <layout class="QHBoxLayout" name="horizontalLayout_10">
                    <item>
                     <widget class="QLineEdit" name="wantedSpectraLineEdit">
+                     <property name="enabled">
+                      <bool>false</bool>
+                     </property>
                      <property name="placeholderText">
                       <string>Файл желаемого спектра</string>
                      </property>
@@ -749,6 +741,13 @@
                  </item>
                  <item>
                   <layout class="QHBoxLayout" name="horizontalLayout_12">
+                   <item>
+                    <widget class="QRadioButton" name="normalizeRadioButton">
+                     <property name="text">
+                      <string>Нормировка</string>
+                     </property>
+                    </widget>
+                   </item>
                    <item>
                     <spacer name="horizontalSpacer_15">
                      <property name="orientation">
@@ -782,19 +781,6 @@
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout_14">
               <item>
-               <spacer name="horizontalSpacer_17">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>40</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-              <item>
                <layout class="QVBoxLayout" name="verticalLayout_8">
                 <item>
                  <spacer name="verticalSpacer">
@@ -811,13 +797,6 @@
                    </size>
                   </property>
                  </spacer>
-                </item>
-                <item>
-                 <widget class="QPushButton" name="closePushButton">
-                  <property name="text">
-                   <string>Закрыть</string>
-                  </property>
-                 </widget>
                 </item>
                </layout>
               </item>

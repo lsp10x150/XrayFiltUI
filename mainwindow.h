@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QFileSystemModel>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -37,15 +38,29 @@ private slots:
 
     void on_savePushButton_clicked();
 
-    void makePlot(QString);
+    void plotSimSpectra(QString);
+
+    void plotWantedSpectra(QString);
 
     void on_simulatedSpectraPushButton_clicked();
 
-    void on_simulatedSpectraLineEdit_textChanged(const QString &arg1);
+    void on_simulatedSpectrasListView_doubleClicked(const QModelIndex &index);
 
-    void on_spectrasTreeView_doubleClicked(const QModelIndex &index);
+    void on_normalizeRadioButton_clicked();
+
+    void on_wantedSpectrPushButton_clicked();
+
+    void on_wantedSpectraLineEdit_textChanged(const QString &arg1);
+
+    void on_findOptimalFilterPushButton_clicked();
 
 private:
     Ui::MainWindow *ui;
+    QFileSystemModel *model;
+    QModelIndex index;
+    QString simSpectraPath;
+    QString wantedSpectraPath;
+    QVector<double> simSpectraX, simSpectraY;
+    QVector<double> wantedSpectraX, wantedSpectraY;
 };
 #endif // MAINWINDOW_H
