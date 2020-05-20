@@ -54,13 +54,18 @@ private slots:
 
     void on_findOptimalFilterPushButton_clicked();
 
+    void on_simulatedSpectraLineEdit_textChanged(const QString &arg1);
+
 private:
     Ui::MainWindow *ui;
     QFileSystemModel *model;
     QModelIndex index;
+    QModelIndexList indexList;
     QString simSpectraPath;
+    QString simSpectra;
     QString wantedSpectraPath;
     QVector<double> simSpectraX, simSpectraY;
     QVector<double> wantedSpectraX, wantedSpectraY;
+    QMap<QString, double> sumSquareErrors;
 };
 #endif // MAINWINDOW_H

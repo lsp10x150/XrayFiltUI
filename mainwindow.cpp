@@ -10,6 +10,7 @@
 #include <QFile>
 #include "qcustomplot.h"
 #include <algorithm>
+#include <QDir>
 
 /// Нормировка
 void Normalize(QVector<double> &y){
@@ -41,6 +42,11 @@ MainWindow::MainWindow(QWidget *parent)
     model->setFilter(QDir::NoDotAndDotDot | QDir::Files);
     ui->simulatedSpectrasListView->setModel(model);
 
+    ui->comboBox->addItem("Al");
+    ui->comboBox->addItem("Cu");
+    ui->comboBox->addItem("Sn");
+    ui->comboBox->addItem("Zn");
+
     /// Настройки плотБокса
     ui->plotBox->xAxis->setLabel("Е, кэВ");
     ui->plotBox->yAxis->setLabel("Отн.ед.");
@@ -48,6 +54,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->plotBox->yAxis->setRange(0, 1.25);
     ui->plotBox->addGraph();
     ui->plotBox->addGraph();
+    ui->plotBox->graph(0)->setLineStyle(QCPGraph::lsStepCenter);
+    ui->plotBox->graph(1)->setLineStyle(QCPGraph::lsStepCenter);
     ui->plotBox->legend->setVisible(true);
     QFont legendFont = font();
     legendFont.setPointSize(9); // and make a bit smaller for legend
@@ -177,12 +185,26 @@ void MainWindow::on_savePushButton_clicked()
         QFile out( FILE_NAME );
         if( out.open( QIODevice::WriteOnly ) ) {
             QTextStream stream( &out );
+
+            int filterMaterial = 0;
+
+            if (ui->comboBox->currentText() == "Al")
+                filterMaterial = 0;
+                else if (ui->comboBox->currentText() == "Cu")
+                    filterMaterial = 1;
+                    else if (ui->comboBox->currentText() == "Sn")
+                        filterMaterial = 2;
+                        else if (ui->comboBox->currentText() == "Zn")
+                            filterMaterial = 3;
+
             stream << ui->intialSpectraPathLineEdit->text() << "\n";
             stream << "N_PARTICLES " << ui->n_particlesSpinBox->value() << "\n";
             stream << "FILTER_WIDTH " << ui->filterWidthDoubleSpinBox->value() << "\n";
             stream << "N_ITERATIONS " << ui->n_iterationsSpinBox->value() << "\n";
             stream << "STEP_REDUCING_FILTER_WIDTH " << ui->stepDecreasingWidthDoubleSpinBox->value() << "\n";
             stream << "INHERENT_FILTRATION " << (ui->checkBox->isChecked() ? 1 : 0) << "\n";
+            stream << "FILTER_MATERIAL " << filterMaterial;
+
             out.close();
             QMessageBox::information(this,"Success", "Настройки успешно применены.");
             ui->startPushButton->setEnabled(true); // После сохраенения настроек активируются клавиши Запуск и Визуализация
@@ -196,7 +218,7 @@ void MainWindow::on_savePushButton_clicked()
 }
 
 /// ооооОООооооОООооооОООооооОООооооОООооооОООооо
-/// Симуляция::Построение графиков в QCustomPlot
+/// Симуляция::Построение симулированного спектра в QCustomPlot
 /// ооооОООооооОООооооОООооооОООооооОООооооОООооо
 void MainWindow::plotSimSpectra(QString fileName){
     QFile in(fileName); // Открываем файл
@@ -238,6 +260,9 @@ void MainWindow::plotSimSpectra(QString fileName){
     ui->plotBox->replot();
 }
 
+/// ооооОООооооОООооооОООооооОООооооОООооооОООооо
+/// Симуляция::Построение желаемого спектра в QCustomPlot
+/// ооооОООооооОООооооОООооооОООооооОООооооОООооо
 void MainWindow::plotWantedSpectra(QString fileName){
     QFile in(fileName); // Открываем файл
     if( in.open( QIODevice::ReadOnly ) ) { //Если получилось открыть файл,
@@ -254,7 +279,7 @@ void MainWindow::plotWantedSpectra(QString fileName){
         qDebug() << "Spectra has been read successfilly.";
 
     } else {
-        QMessageBox::warning(this,"Fail", "Не удалось прочесть файл спектра.");
+        QMessageBox::information(this,"Note", "Выберите файл желаемого спектра.");
     }
 
     if(ui->normalizeRadioButton->isChecked())
@@ -284,27 +309,28 @@ void MainWindow::plotWantedSpectra(QString fileName){
 /// ооооОООооооОООооооОООооооОООооооОООооооОООооо
 void MainWindow::on_simulatedSpectraPushButton_clicked()
 {
-    QString file = QFileDialog::getExistingDirectory(this,
+    QString dir = QFileDialog::getExistingDirectory(this,
                                                         tr("Выберите директорию с симулированными спектрами"),
                                                         "~/");
-    qDebug() << "Your choosen dir is: " << file;
-    ui->simulatedSpectraLineEdit->setText(file);
-    ui->simulatedSpectrasListView->setRootIndex(model->setRootPath(file));
+    qDebug() << "Your choosen dir is: " << dir;
+    ui->simulatedSpectraLineEdit->setText(dir);
+    ui->simulatedSpectrasListView->setRootIndex(model->setRootPath(dir));
 }
 
 
 void MainWindow::on_simulatedSpectrasListView_doubleClicked(const QModelIndex &index)
 {
     if(model->fileInfo(index).isFile()){
-        simSpectraPath = model->fileInfo(index).absoluteFilePath();
-        plotSimSpectra(simSpectraPath);
+        plotSimSpectra(model->fileInfo(index).absoluteFilePath());
         plotWantedSpectra(wantedSpectraPath);
+        qDebug() << index;
+        simSpectra = model->fileInfo(index).absoluteFilePath();
     }
 }
 
 void MainWindow::on_normalizeRadioButton_clicked()
 {
-    plotSimSpectra(simSpectraPath);
+    plotSimSpectra(simSpectra);
     plotWantedSpectra(wantedSpectraPath);
 
 }
@@ -327,5 +353,50 @@ void MainWindow::on_wantedSpectraLineEdit_textChanged(const QString &arg1)
 
 void MainWindow::on_findOptimalFilterPushButton_clicked()
 {
+    QDir dir;
+    dir.setFilter(QDir::Files);
+    dir.cd(simSpectraPath);
+    QVector<QString> paths;
 
+    sumSquareErrors.clear();
+
+    for (QFileInfo temp : dir.entryInfoList()){
+        paths.push_back(QString(temp.absoluteFilePath()));
+    }
+
+    for (QString path : paths){
+        QFile in(path); // Открываем файл
+        if( in.open( QIODevice::ReadOnly ) ) { //Если получилось открыть файл,
+            QTextStream stream( &in ); // то инициализируем поток
+
+            QVector<double> x(200), y(200);
+
+            double sum = 0;
+
+            for (int i = 0; i < 200; ++i){ // Читаем файл спектра в векторы икс и игрек
+                stream >> x[i] >> y[i];
+                //qDebug() << x[i] << " " << y[i];
+            }
+            in.close(); // Закрываем файл
+
+            QVector<double> fakeWantedSpectraY = wantedSpectraY;
+            Normalize(y);
+            Normalize(fakeWantedSpectraY);
+            for (int i = 0; i < 200; ++i){ //
+                sum += (y[i] - fakeWantedSpectraY[i])*(y[i] - fakeWantedSpectraY[i]);
+            }
+            qDebug() << y;
+            sumSquareErrors.insert(path, sum);
+        }
+    }
+    qDebug() << sumSquareErrors;
+
+    auto minElement = std::min_element(sumSquareErrors.begin(), sumSquareErrors.end());
+    QMessageBox::information(this, "Optimal filter", "Профиль спектра по адресу: \n" + minElement.key() + "\nНаиболее похож на профиль желаемого.");
+}
+
+
+void MainWindow::on_simulatedSpectraLineEdit_textChanged(const QString &arg1)
+{
+    simSpectraPath = arg1;
 }
