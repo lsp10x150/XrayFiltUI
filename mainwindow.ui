@@ -36,7 +36,7 @@
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
@@ -207,7 +207,7 @@
                   <string/>
                  </property>
                  <property name="minimum">
-                  <double>0.100000000000000</double>
+                  <double>0.000000000000000</double>
                  </property>
                  <property name="maximum">
                   <double>100.000000000000000</double>
@@ -686,19 +686,6 @@
             </property>
            </spacer>
           </item>
-          <item>
-           <widget class="QPushButton" name="saveImagePushButton">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>1</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>Сохранить изображение</string>
-            </property>
-           </widget>
-          </item>
          </layout>
         </item>
         <item>
@@ -908,13 +895,7 @@
     <addaction name="separator"/>
     <addaction name="infoAction"/>
    </widget>
-   <widget class="QMenu" name="menu_3">
-    <property name="title">
-     <string>Журнал</string>
-    </property>
-   </widget>
    <addaction name="menu"/>
-   <addaction name="menu_3"/>
    <addaction name="menu_2"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
