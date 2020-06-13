@@ -1,4 +1,4 @@
-#include "mainwindow.h"
+﻿#include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QFileDialog>
 #include <QProcess>
@@ -59,7 +59,6 @@ MainWindow::MainWindow(QWidget *parent)
     ui->plotBox->graph(1)->setPen(QPen(Qt::red)); }
 MainWindow::~MainWindow() {
     delete ui;}
-
 /// ооооОООооооОООооооОООооооОООооооОООооооОООооо
 /// Кнопка выхода
 /// ооооОООооооОООооооОООооооОООооооОООооооОООооо
@@ -85,14 +84,15 @@ void MainWindow::on_quitAction_triggered() {
 void MainWindow::on_visualisePushButton_clicked() {
     // Запустить процесс ./XrayFilt с аргументамим config.dat vis1.mac
     QString program = "XrayFilt config.dat vis1.mac";
-    QProcess *myProcess = new QProcess(this); // ./XrayFilt построен на основе GEANT4 - простая симуляция фильтрации рентгеновского излучения
-    myProcess->setReadChannel(QProcess::StandardOutput); // Можно убрать, все равно ничего не читаю
+    // ./XrayFilt построен на основе GEANT4 - простая симуляция фильтрации рентгеновского излучения
+    QProcess *myProcess = new QProcess(this);
     myProcess->execute(program); }
 /// ооооОООооооОООооооОООооооОООооооОООооооОООооо
 /// Кнопка выбора файла с исходным спектром
 /// ооооОООооооОООооооОООооооОООооооОООооооОООооо
 void MainWindow::on_chooseInitSpectraFilePushButton_clicked() {
-    // Открывается файловый диалог, который передает в initialSpectraPathLineEdit абсолютный путь к файлу исходного спектра
+    // Открывается файловый диалог, который передает в
+    // initialSpectraPathLineEdit абсолютный путь к файлу исходного спектра
     QString file = QFileDialog::getOpenFileName(this,
         tr("Выберите файл исходного спектра"),
         "~/",
@@ -141,7 +141,12 @@ void MainWindow::on_savePushButton_clicked() {
     QTextCodec::setCodecForLocale( QTextCodec::codecForName( "UTF-8" ) );
         static const char* const FILE_NAME = "config.dat";
         QFile out( FILE_NAME );
-        if( out.open( QIODevice::WriteOnly ) ) {
+        if ((ui->filterWidthDoubleSpinBox->value() - ui->n_iterationsSpinBox->value() *
+             ui->stepDecreasingWidthDoubleSpinBox->value()) < 0){
+            int n = ui->filterWidthDoubleSpinBox->value() / ui->stepDecreasingWidthDoubleSpinBox->value();
+            QString warn = "После %1 итерации толщина фильтра станет меньше нуля.\nПоправьте значение и попробуйте снова.";
+            QMessageBox::warning(this,"Warning", warn.arg(n));
+        } else if( out.open( QIODevice::WriteOnly ) ) {
             QTextStream stream( &out );
             int filterMaterial = 0;
             if (ui->comboBox->currentText() == "Al")
@@ -159,17 +164,23 @@ void MainWindow::on_savePushButton_clicked() {
             stream << "STEP_REDUCING_FILTER_WIDTH " << ui->stepDecreasingWidthDoubleSpinBox->value() << "\n";
             stream << "INHERENT_FILTRATION " << (ui->checkBox->isChecked() ? 1 : 0) << "\n";
             stream << "FILTER_MATERIAL " << filterMaterial;
-            out.close();
             QMessageBox::information(this,"Success", "Настройки успешно применены.");
-            ui->startPushButton->setEnabled(true); // После сохраенения настроек активируются клавиши Запуск и Визуализация
+            // После сохраенения настроек активируются клавиши Запуск и Визуализация
+            ui->startPushButton->setEnabled(true);
             ui->visualisePushButton->setEnabled(true);
         } else {
-            QMessageBox::warning(this,"Fail", "Не удалось создать/сохранить файл настроек.\nЗапуск возможен только с настройками по умолчанию.");
-            ui->startPushButton->setEnabled(true); // Даже в случае неудачи кнопки Запуск и Визуализация все равно активируются, поскольку в ./XrayFilt встроена
-            // инициализация дефолтных настроек и симуляцию все равно можно будет запустить, хотя она и будет бесполезной.
-            ui->visualisePushButton->setEnabled(true); } }
+            QMessageBox::warning(this,"Fail", "Не удалось создать/сохранить файл настроек.\n"
+                                              "Запуск возможен только с настройками по умолчанию.");
+            // Даже в случае неудачи кнопки Запуск и
+            // Визуализация все равно активируются, поскольку в ./XrayFilt встроена
+            // инициализация дефолтных настроек и симуляцию все равно можно
+            // будет запустить, хотя она и будет бесполезной.
+            ui->startPushButton->setEnabled(true);
+            ui->visualisePushButton->setEnabled(true); }
+        out.close(); }
+
 /// ооооОООооооОООооооОООооооОООооооОООооооОООооо
-/// Симуляция::Построение симулированного спектра в QCustomPlot
+/// Просмотр::Построение симулированного спектра в QCustomPlot
 /// ооооОООооооОООооооОООооооОООооооОООооооОООооо
 void MainWindow::plotSimSpectra(QString fileName){
     QFile in(fileName); // Открываем файл
@@ -192,10 +203,13 @@ void MainWindow::plotSimSpectra(QString fileName){
         ui->plotBox->yAxis->setLabel("Отн.ед.") :
                 ui->plotBox->yAxis->setLabel("Кол-во частиц");
     ui->plotBox->xAxis->setRange(0, 180);
-    ui->plotBox->yAxis->setRange(0,std::max(*std::max_element(simSpectraY.begin(),simSpectraY.end()), *std::max_element(wantedSpectraY.begin(),wantedSpectraY.end())));
+    ui->plotBox->yAxis->setRange(0,std::max(*std::max_element
+                                            (simSpectraY.begin(),simSpectraY.end()),
+                                            *std::max_element(wantedSpectraY.begin(),
+                                                              wantedSpectraY.end())));
     ui->plotBox->replot(); }
 /// ооооОООооооОООооооОООооооОООооооОООооооОООооо
-/// Симуляция::Построение желаемого спектра в QCustomPlot
+/// Просмотр::Построение желаемого спектра в QCustomPlot
 /// ооооОООооооОООооооОООооооОООооооОООооооОООооо
 void MainWindow::plotWantedSpectra(QString fileName){
     QFile in(fileName); // Открываем файл
@@ -209,18 +223,19 @@ void MainWindow::plotWantedSpectra(QString fileName){
         QMessageBox::information(this,"Note", "Выберите файл желаемого спектра."); }
     if(ui->normalizeRadioButton->isChecked())
             Normalize(wantedSpectraY);
-    ui->plotBox->graph(1)->setPen(QPen(Qt::red)); // line color blue for first graph
-    ui->plotBox->graph(1)->setBrush(QBrush(QColor(255, 0, 0, 20))); // first graph will be filled with translucent blue
+    ui->plotBox->graph(1)->setPen(QPen(Qt::red));
+    ui->plotBox->graph(1)->setBrush(QBrush(QColor(255, 0, 0, 20)));
     ui->plotBox->graph(1)->setData(wantedSpectraX, wantedSpectraY);
     ui->plotBox->xAxis->setLabel("Е, кэВ");
     ui->normalizeRadioButton->isChecked() ?
         ui->plotBox->yAxis->setLabel("Отн.ед.") :
                 ui->plotBox->yAxis->setLabel("Кол-во частиц");
     ui->plotBox->xAxis->setRange(0, 180);
-    ui->plotBox->yAxis->setRange(0,std::max(*std::max_element(simSpectraY.begin(),simSpectraY.end()), *std::max_element(wantedSpectraY.begin(),wantedSpectraY.end())));
+    ui->plotBox->yAxis->setRange(0,std::max(*std::max_element(simSpectraY.begin(),simSpectraY.end()),
+                                            *std::max_element(wantedSpectraY.begin(),wantedSpectraY.end())));
     ui->plotBox->replot(); }
 /// ооооОООооооОООооооОООооооОООооооОООооооОООооо
-/// Симуляция::кнопка выбора директории со спектрами
+/// Просмотр::кнопка выбора директории со спектрами
 /// ооооОООооооОООооооОООооооОООооооОООооооОООооо
 void MainWindow::on_simulatedSpectraPushButton_clicked() {
     QString dir = QFileDialog::getExistingDirectory(this,
@@ -247,6 +262,9 @@ void MainWindow::on_wantedSpectrPushButton_clicked() {
 void MainWindow::on_wantedSpectraLineEdit_textChanged(const QString &arg1) {
     plotWantedSpectra(arg1);
     wantedSpectraPath = arg1; }
+/// ооооОООооооОООооооОООооооОООооооОООооооОООооо
+/// Просмотр::Поиск оптимального фильтра
+/// ооооОООооооОООооооОООооооОООооооОООооооОООооо
 void MainWindow::on_findOptimalFilterPushButton_clicked() {
     QDir dir;
     dir.setFilter(QDir::Files);
